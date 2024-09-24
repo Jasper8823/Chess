@@ -40,4 +40,8 @@ public class Piece {
         g2d.drawImage(sprite, frameXPos, frameYPos, null);
     }
 
+    public int getCol() {return col;}
+
+    public int getRow() {return row;}
+
 }
