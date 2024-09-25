@@ -31,7 +31,7 @@ public class Piece {
 
     protected Image sprite;
 
-    BoardController boardcontroller;
+    protected BoardController boardcontroller;
 
     public Piece(BoardController boardController){
         this.boardcontroller = boardController;
@@ -41,6 +41,10 @@ public class Piece {
     public void paint(Graphics2D g2d){
         g2d.drawImage(sprite, frameXPos, frameYPos, null);
     }
+
+    public boolean isValidMovement(int col, int row) { return true; }
+
+    public boolean moveCollidesWithPiece(int col, int row) { return false; }
 
     public int getCol() {return col;}
 

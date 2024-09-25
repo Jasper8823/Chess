@@ -1,6 +1,7 @@
 package main.Controllers;
 
 import main.Entities.Board;
+import main.Entities.CheckScanner;
 import main.Entities.Move;
 import main.Entities.Piece;
 import main.UserInteraction.Mouse;
@@ -12,6 +13,8 @@ public class BoardController extends JPanel {
 
     Board board;
     Mouse mouse = new Mouse(this);
+
+    CheckScanner checkScanner = new CheckScanner(this);
 
     public BoardController() {
         board = new Board();
@@ -45,7 +48,6 @@ public class BoardController extends JPanel {
                 return piece;
             }
         }
-        System.out.println();
         return null;
     }
 
@@ -63,9 +65,28 @@ public class BoardController extends JPanel {
         board.pieces.remove(move.capture);
     }
 
-    public boolean isValidMove(Move move){
+    public Piece findKing(boolean isWhite){
+        for(Piece piece : board.pieces){
+            if(piece.isWhite==isWhite && piece.name.equals("King")){
+                return piece;
+            }
+        }
+        return null;
+    }
 
+    public boolean isValidMove(Move move){
         if(isSameTeam(move.piece, move.capture)){
+            return false;
+        }
+        if(checkScanner.isKingChecked(move)){
+            return false;
+        }
+
+        if(!move.piece.isValidMovement(move.toRow, move.toCol)){
+            return false;
+        }
+
+        if(move.piece.moveCollidesWithPiece(move.toCol, move.toRow)){
             return false;
         }
 
@@ -86,6 +107,16 @@ public class BoardController extends JPanel {
             for(int ii=0; ii<board.cols; ii++){
                 g2d.setColor((i+ii)%2 == 0 ? new Color(255, 254, 195) : new Color(114, 143, 76, 255));
                 g2d.fillRect(i*board.blockSize, ii*board.blockSize, board.blockSize, board.blockSize);
+            }
+        }
+        if(board.selectedPiece!=null) {
+            for (int r = 0; r < board.rows; r++) {
+                for (int c = 0; c < board.cols; c++) {
+                    if (isValidMove(new Move(this, board.selectedPiece, r, c))) {
+                        g2d.setColor(new Color(124, 227, 59, 169));
+                        g2d.fillRect(c * board.blockSize, r * board.blockSize, board.blockSize, board.blockSize);
+                    }
+                }
             }
         }
 
