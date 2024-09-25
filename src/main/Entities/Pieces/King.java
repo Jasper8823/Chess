@@ -18,7 +18,9 @@ public class King extends Piece {
         this.name = "King";
 
         this.sprite = sheet.getSubimage(0, isWhite ? 0: sheetScale, sheetScale,sheetScale).getScaledInstance(boardController.getblockSize()+4,boardController.getblockSize()+4, BufferedImage.SCALE_SMOOTH);
+    }
 
-
+    public boolean isValidMovement(int row, int col) {
+        return Math.abs((col - this.col)*(row-this.row))==1||Math.abs(col - this.col)+Math.abs(row-this.row)==1;
     }
 }

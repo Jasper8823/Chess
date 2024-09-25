@@ -18,6 +18,7 @@ public class Piece {
 
     public BufferedImage sheet;
 
+    public boolean isFirstMove = true;
 
     private void loadSpriteSheet() {
         try {

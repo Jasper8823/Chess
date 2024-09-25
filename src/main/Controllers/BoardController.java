@@ -58,6 +58,8 @@ public class BoardController extends JPanel {
         move.piece.frameXPos = move.toCol * board.blockSize;
         move.piece.frameYPos = move.toRow * board.blockSize;
 
+        move.piece.isFirstMove = false;
+
         capture(move);
     }
 
