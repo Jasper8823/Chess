@@ -1,5 +1,6 @@
 package main.UserInteraction;
 
+import main.Controllers.BoardController;
 import main.Entities.Board;
 import main.Entities.Move;
 import main.Entities.Piece;
@@ -11,58 +12,64 @@ import java.awt.event.MouseMotionListener;
 
 public class Mouse extends MouseAdapter {
 
-    private Board board;
+    private final BoardController boardController;
 
-    public Mouse(Board board) {
-        this.board = board;
+    public Mouse(BoardController boardController) {
+        this.boardController = boardController;
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
 
-        int col = e.getX()/board.blockSize;
-        int row = e.getY()/board.blockSize;
+        int col = e.getX()/boardController.getblockSize();
+        int row = e.getY()/boardController.getblockSize();
 
-        Piece piece = board.getPieceByXY(col,row);
+        Piece piece = boardController.getPieceByXY(col,row);
 
         if (piece != null) {
-            board.selectedPiece = piece;
+            boardController.setSelectedPiece(piece);
         }
 
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        int col = e.getX() / board.blockSize;
-        int row = e.getY() / board.blockSize;
+        int col = e.getX() / boardController.getblockSize();
+        int row = e.getY() / boardController.getblockSize();
 
-        if (board.selectedPiece != null) {
-            Move move = new Move(board, board.selectedPiece, row, col);
+        if(col<8 && col>=0 && row <8 && row>=0) {
+            if (boardController.getselectedPiece() != null) {
+                Move move = new Move(boardController, boardController.getselectedPiece(), row, col);
 
-            if (board.isValidMove(move)) {
-                board.makeMove(move);
-            } else {
-                resetPiecePosition();
+                if (boardController.isValidMove(move)) {
+                    boardController.makeMove(move);
+                } else {
+                    resetPiecePosition();
+                }
+
+                boardController.setSelectedPiece(null);
+                boardController.repaint();
             }
-
-            board.selectedPiece = null;
-            board.repaint();
+        }else{
+            resetPiecePosition();
+            boardController.setSelectedPiece(null);
+            boardController.repaint();
         }
     }
 
     private void resetPiecePosition() {
-        board.selectedPiece.frameXPos = board.selectedPiece.col * board.blockSize;
-        board.selectedPiece.frameYPos = board.selectedPiece.row * board.blockSize;
+        boardController.getselectedPiece().frameXPos = boardController.getselectedPiece().col * boardController.getblockSize();
+        boardController.getselectedPiece().frameYPos = boardController.getselectedPiece().row * boardController.getblockSize();
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
 
-        if(board.selectedPiece != null) {
-            board.selectedPiece.frameXPos = e.getX()-board.blockSize/2;
-            board.selectedPiece.frameYPos = e.getY()-board.blockSize/2;
+        if(boardController.getselectedPiece() != null) {
+            boardController.getselectedPiece().frameXPos = e.getX()-boardController.getblockSize()/2;
+            boardController.getselectedPiece().frameYPos = e.getY()-boardController.getblockSize()/2;
 
-            board.repaint();
+            boardController.repaint();
         }
 
     }

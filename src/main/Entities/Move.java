@@ -1,5 +1,7 @@
 package main.Entities;
 
+import main.Controllers.BoardController;
+
 public class Move {
 
     public int toRow;
@@ -11,7 +13,7 @@ public class Move {
     public Piece piece;
     public Piece capture;
 
-    public Move(Board board , Piece piece,int toRow, int toCol) {
+    public Move(BoardController boardController , Piece piece, int toRow, int toCol) {
         this.toRow = toRow;
         this.toCol = toCol;
 
@@ -19,8 +21,6 @@ public class Move {
         this.fromCol = piece.getCol();
 
         this.piece = piece;
-        this.capture = board.getPieceByXY(toCol,toRow);
-
+        this.capture = boardController.getPieceByXY(toCol, toRow);
     }
-
 }

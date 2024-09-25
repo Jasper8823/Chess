@@ -1,5 +1,7 @@
 package main.Entities;
 
+import main.Controllers.BoardController;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -29,10 +31,10 @@ public class Piece {
 
     protected Image sprite;
 
-    Board board;
+    BoardController boardcontroller;
 
-    public Piece(Board board){
-        this.board = board;
+    public Piece(BoardController boardController){
+        this.boardcontroller = boardController;
         loadSpriteSheet();
     }
 

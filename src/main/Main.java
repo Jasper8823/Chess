@@ -1,6 +1,6 @@
 package main;
 
-import main.ChessController.GUIController;
+import main.Controllers.GUIController;
 
 public class Main {
     public static void main(String[] args) {
