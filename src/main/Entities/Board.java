@@ -14,6 +14,8 @@ public class Board {
     public final int cols  = 8;
     public final int rows  = 8;
 
+    public int enPassantTile = -1;
+
     public Piece selectedPiece;
 
     public ArrayList<Piece> pieces = new ArrayList<>();

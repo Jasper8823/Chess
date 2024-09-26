@@ -4,6 +4,7 @@ import main.Entities.Board;
 import main.Entities.CheckScanner;
 import main.Entities.Move;
 import main.Entities.Piece;
+import main.Entities.Pieces.Queen;
 import main.UserInteraction.Mouse;
 
 import javax.swing.*;
@@ -23,6 +24,10 @@ public class BoardController extends JPanel {
 
         this.addMouseListener(mouse);
         this.addMouseMotionListener(mouse);
+    }
+
+    public int getTilenum(int col, int row) {
+        return row * board.rows + col;
     }
 
     public void setSelectedPiece(Piece piece) {
@@ -53,6 +58,39 @@ public class BoardController extends JPanel {
 
     public void makeMove(Move move){
 
+        if(move.piece.name.equals("Pawn")){
+            makeMovePaw(move);
+        }else {
+            move.piece.col = move.toCol;
+            move.piece.row = move.toRow;
+            move.piece.frameXPos = move.toCol * board.blockSize;
+            move.piece.frameYPos = move.toRow * board.blockSize;
+
+            move.piece.isFirstMove = false;
+
+            capture(move.capture);
+        }
+    }
+
+    private void makeMovePaw(Move move){
+
+        int colorIndex = move.piece.isWhite ? 1 : -1;
+
+        if(getTilenum(move.toCol, move.toRow) == board.enPassantTile){
+            move.capture = getPieceByXY(move.toCol, move.toRow+colorIndex);
+        }
+        if(Math.abs(move.piece.row - move.toRow)==2){
+            board.enPassantTile = getTilenum(move.toCol, move.toRow + colorIndex);
+        }else{
+            board.enPassantTile = -1;
+        }
+
+        colorIndex = move.piece.isWhite ? 0 : 7;
+
+        if(move.toRow == colorIndex){
+            promotePawn(move);
+        }
+
         move.piece.col = move.toCol;
         move.piece.row = move.toRow;
         move.piece.frameXPos = move.toCol * board.blockSize;
@@ -60,11 +98,20 @@ public class BoardController extends JPanel {
 
         move.piece.isFirstMove = false;
 
-        capture(move);
+        capture(move.capture);
     }
 
-    public void capture(Move move){
-        board.pieces.remove(move.capture);
+    public void promotePawn(Move move){
+        board.pieces.add(new Queen(this, move.toCol, move.toRow, move.piece.isWhite));
+        capture(move.piece);
+    }
+
+    public int getEnPassant(){
+        return board.enPassantTile;
+    }
+
+    public void capture(Piece piece){
+        board.pieces.remove(piece);
     }
 
     public Piece findKing(boolean isWhite){

@@ -1,14 +1,11 @@
 package main.UserInteraction;
 
 import main.Controllers.BoardController;
-import main.Entities.Board;
 import main.Entities.Move;
 import main.Entities.Piece;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
 
 public class Mouse extends MouseAdapter {
 
