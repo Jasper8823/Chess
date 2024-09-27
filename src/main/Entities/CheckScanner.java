@@ -2,6 +2,8 @@ package main.Entities;
 
 import main.Controllers.BoardController;
 
+import java.sql.SQLOutput;
+
 public class CheckScanner {
     BoardController boardController;
 
@@ -16,13 +18,12 @@ public class CheckScanner {
 
         int kingCol = king.col, kingRow = king.row;
 
-        if(boardController.getselectedPiece()!=null && boardController.getselectedPiece().equals("King")){
-            kingCol = move.piece.col;
-            kingRow = move.piece.row;
+        if(boardController.getselectedPiece()!=null && boardController.getselectedPiece().name.equals("King")){
+            kingCol = move.toCol;
+            kingRow = move.toRow;
         }
 
-        return
-                hitByRook(move.toCol, move.toRow, king, kingCol, kingRow, 1,  0) || // right
+        return  hitByRook(move.toCol, move.toRow, king, kingCol, kingRow, 1,  0) || // right
                 hitByRook(move.toCol, move.toRow, king, kingCol, kingRow, -1, 0) || // left
                 hitByRook(move.toCol, move.toRow, king, kingCol, kingRow, 0, 1) || // up
                 hitByRook(move.toCol, move.toRow, king, kingCol, kingRow, 0, -1) || // down
@@ -34,26 +35,24 @@ public class CheckScanner {
 
                 hitByKnight(move.toCol, move.toRow, king, kingCol, kingRow) ||
                 hitByPawn(move.toCol, move.toRow, king, kingCol, kingRow) ||
-                hitByKing(king, kingCol, kingRow)
-        ;
+                hitByKing(king, kingCol, kingRow);
 
     }
 
     private boolean hitByRook(int col, int row,Piece king, int kingCol, int kingRow, int colVal, int rowVal) {
 
-        for (int i=0; i<8;i++){
+        for (int i=1; i<8;i++){
             if(kingCol+(i*colVal) == col && kingRow+(i*rowVal) == row){
                 break;
             }
 
             Piece piece = boardController.getPieceByXY(kingCol+(i*colVal), kingRow+(i*rowVal));
             if(piece!=null && piece != boardController.getselectedPiece()){
-                if(!boardController.isSameTeam(piece, king) && (piece.name.equals("Rook")||piece.name.equals("Queen"))){
+                if(!boardController.isSameTeam(piece, king) && ((piece.name.equals("Rook")||piece.name.equals("Queen")))){
                     return true;
                 }
                 break;
             }
-
         }
 
         return false;
@@ -61,14 +60,14 @@ public class CheckScanner {
 
     private boolean hitByBishop(int col, int row,Piece king, int kingCol, int kingRow, int colVal, int rowVal) {
 
-        for (int i=0; i<8;i++){
+        for (int i=1; i<8;i++){
             if(kingCol-(i*colVal) == col && kingRow-(i*rowVal) == row){
                 break;
             }
 
             Piece piece = boardController.getPieceByXY(kingCol-(i*colVal), kingRow-(i*rowVal));
             if(piece!=null && piece != boardController.getselectedPiece()){
-                if(!boardController.isSameTeam(piece, king) && (piece.name.equals("Bishop")||piece.name.equals("Queen"))){
+                if(!boardController.isSameTeam(piece, king) && ((piece.name.equals("Bishop")||piece.name.equals("Queen")))){
                     return true;
                 }
                 break;
@@ -119,5 +118,26 @@ public class CheckScanner {
         return checkByPawn(boardController.getPieceByXY(kingCol-1,kingRow+colorVal), king, col, row)||
                 checkByPawn(boardController.getPieceByXY(kingCol+1,kingRow+colorVal), king, col, row);
     }
+
+    public boolean isGameOver(Piece king) {
+        for (Piece piece : boardController.getPieceList()) {
+
+            if (boardController.isSameTeam(piece, king)) {
+
+                boardController.board.selectedPiece = piece == king ? king : null;
+                for (int row = 0; row < 8; row++) {
+                    for (int col = 0; col < 8; col++) {
+                        Move move = new Move(boardController, piece, col, row);
+
+                        if (boardController.isValidMove(move)) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
 
 }

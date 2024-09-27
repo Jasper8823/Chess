@@ -9,13 +9,18 @@ import main.UserInteraction.Mouse;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 public class BoardController extends JPanel {
 
-    Board board;
+    public Board board;
     Mouse mouse = new Mouse(this);
 
-    CheckScanner checkScanner = new CheckScanner(this);
+    private boolean isWhiteToMove = true;
+    private boolean isGameOver = false;
+
+    public CheckScanner checkScanner = new CheckScanner(this);
 
     public BoardController() {
         board = new Board();
@@ -24,6 +29,10 @@ public class BoardController extends JPanel {
 
         this.addMouseListener(mouse);
         this.addMouseMotionListener(mouse);
+    }
+
+    public ArrayList<Piece> getPieceList(){
+        return board.pieces;
     }
 
     public int getTilenum(int col, int row) {
@@ -60,17 +69,70 @@ public class BoardController extends JPanel {
 
         if(move.piece.name.equals("Pawn")){
             makeMovePaw(move);
-        }else {
-            move.piece.col = move.toCol;
-            move.piece.row = move.toRow;
-            move.piece.frameXPos = move.toCol * board.blockSize;
-            move.piece.frameYPos = move.toRow * board.blockSize;
+        }else if(move.piece.name.equals("King")){
+            makeMoveKing(move);
+        }
+        move.piece.col = move.toCol;
+        move.piece.row = move.toRow;
+        move.piece.frameXPos = move.toCol * board.blockSize;
+        move.piece.frameYPos = move.toRow * board.blockSize;
 
-            move.piece.isFirstMove = false;
+        move.piece.isFirstMove = false;
 
-            capture(move.capture);
+        capture(move.capture);
+
+        isWhiteToMove = !isWhiteToMove;
+
+        updateGameState();
+    }
+
+    private void updateGameState() {
+        Piece king = findKing(isWhiteToMove);
+
+        if (checkScanner.isGameOver(king)) {
+
+            if (checkScanner.isKingChecked(new Move(this, king, king.col, king.row))) {
+                System.out.println(isWhiteToMove ? "Black Wins!" : "White Wins!");
+            }
+            else {
+                System.out.println("Stalemate");
+            }
+        }else if(notEnoughPieces(true) && notEnoughPieces(false)){
+            System.out.println("Not enough pieces to mate");
         }
     }
+
+    private boolean notEnoughPieces(boolean isWhite) {
+        ArrayList<String> names = board.pieces.stream()
+                .filter(p -> p.isWhite == isWhite)
+                .map(p -> p.name)
+                .collect(Collectors.toCollection(ArrayList::new));
+
+        if (names.contains("Queen") || names.contains("Rook") || names.contains("Pawn")) {
+            return false;
+        }
+
+        return names.size() < 3;
+    }
+
+
+    private void makeMoveKing(Move move) {
+        if (Math.abs(move.piece.col - move.toCol) == 2) {
+            Piece rook;
+
+            if (move.piece.col < move.toCol) {
+                rook = getPieceByXY(7, move.piece.row);
+                rook.col = 5;
+            }
+            else {
+                rook = getPieceByXY(0, move.piece.row);
+                rook.col = 3;
+            }
+
+            rook.frameXPos = rook.col * board.blockSize;
+        }
+    }
+
 
     private void makeMovePaw(Move move){
 
@@ -90,15 +152,6 @@ public class BoardController extends JPanel {
         if(move.toRow == colorIndex){
             promotePawn(move);
         }
-
-        move.piece.col = move.toCol;
-        move.piece.row = move.toRow;
-        move.piece.frameXPos = move.toCol * board.blockSize;
-        move.piece.frameYPos = move.toRow * board.blockSize;
-
-        move.piece.isFirstMove = false;
-
-        capture(move.capture);
     }
 
     public void promotePawn(Move move){
@@ -124,10 +177,12 @@ public class BoardController extends JPanel {
     }
 
     public boolean isValidMove(Move move){
-        if(isSameTeam(move.piece, move.capture)){
+
+        if(move.piece.isWhite != isWhiteToMove){
             return false;
         }
-        if(checkScanner.isKingChecked(move)){
+
+        if(isSameTeam(move.piece, move.capture)){
             return false;
         }
 
@@ -138,6 +193,10 @@ public class BoardController extends JPanel {
         if(move.piece.moveCollidesWithPiece(move.toCol, move.toRow)){
             return false;
         }
+        if(checkScanner.isKingChecked(move)){
+            return false;
+        }
+
 
         return true;
     }
