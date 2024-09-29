@@ -1,22 +1,43 @@
 package main.Controllers;
 
-import main.Entities.Board;
 import main.Entities.Piece;
 import main.Entities.Pieces.*;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class GUIController {
+
+    public BufferedImage sheet;
+
+    private void loadSpriteSheet() {
+        try {
+            sheet = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemResourceAsStream("pieces.png")));
+            sheetScale = sheet.getWidth() / 6; // Assuming the sheet has 6 pieces in width
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    protected int sheetScale;
+
+    JFrame promoterChoice = new JFrame();
+
     public GUIController() {
+        loadSpriteSheet();
+
         JFrame frame = new JFrame();
         frame.setMinimumSize(new Dimension(1000, 1000));
 
         frame.setLayout(new GridBagLayout());
         frame.pack();
 
-        BoardController boardController = new BoardController();
+        BoardController boardController = new BoardController(this);
         frame.add(boardController);
         ArrayList<Piece> pieces = new ArrayList<>();
         pieces.add(new Knight(boardController, 1,7,true));
@@ -61,15 +82,59 @@ public class GUIController {
         pieces.add(new King(boardController, 4,0,false));
         pieces.add(new Queen(boardController, 3,0,false));
 
-
-
-
         for(Piece piece : pieces){
             boardController.addPiece(piece);
         }
 
-
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
+
+    public String showPromotionDialog(boolean isWhite) {
+        final String[] chosenPiece = new String[1];
+
+        JDialog dialog = new JDialog(promoterChoice, "Promote Pawn", true);
+        dialog.setLayout(new FlowLayout());
+        dialog.setMinimumSize(new Dimension(300, 130));
+
+        // Create and add buttons with their respective images
+        JButton knightButton = new JButton(new ImageIcon(sheet.getSubimage(3*sheetScale, isWhite? 0: sheetScale, sheetScale,sheetScale).getScaledInstance(65,65, BufferedImage.SCALE_SMOOTH)));
+        knightButton.addActionListener(e -> {
+            chosenPiece[0] = "Knight";
+            dialog.dispose();
+        });
+
+        JButton bishopButton = new JButton(new ImageIcon(sheet.getSubimage(2*sheetScale, isWhite? 0: sheetScale, sheetScale,sheetScale).getScaledInstance(65,65, BufferedImage.SCALE_SMOOTH)));
+        bishopButton.addActionListener(e -> {
+            chosenPiece[0] = "Bishop";
+            dialog.dispose();
+        });
+
+        JButton rookButton = new JButton(new ImageIcon(sheet.getSubimage(4*sheetScale, isWhite? 0: sheetScale, sheetScale,sheetScale).getScaledInstance(65,65, BufferedImage.SCALE_SMOOTH)));
+        rookButton.addActionListener(e -> {
+            chosenPiece[0] = "Rook";
+            dialog.dispose();
+        });
+
+        JButton queenButton = new JButton(new ImageIcon(sheet.getSubimage(sheetScale, isWhite? 0: sheetScale, sheetScale,sheetScale).getScaledInstance(65,65, BufferedImage.SCALE_SMOOTH)));
+        queenButton.addActionListener(e -> {
+            chosenPiece[0] = "Queen";
+            dialog.dispose();
+        });
+
+        // Add buttons to the dialog
+        dialog.add(knightButton);
+        dialog.add(bishopButton);
+        dialog.add(rookButton);
+        dialog.add(queenButton);
+
+        // Show the dialog and block until a choice is made
+        dialog.pack();
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
+
+        // Return the chosen piece
+        return chosenPiece[0];
+    }
+
 }

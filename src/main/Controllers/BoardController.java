@@ -4,7 +4,10 @@ import main.Entities.Board;
 import main.Entities.CheckScanner;
 import main.Entities.Move;
 import main.Entities.Piece;
+import main.Entities.Pieces.Bishop;
+import main.Entities.Pieces.Knight;
 import main.Entities.Pieces.Queen;
+import main.Entities.Pieces.Rook;
 import main.UserInteraction.Mouse;
 
 import javax.swing.*;
@@ -17,12 +20,12 @@ public class BoardController extends JPanel {
     public Board board;
     Mouse mouse = new Mouse(this);
 
-    private boolean isWhiteToMove = true;
-    private boolean isGameOver = false;
+    GUIController guiController;
 
     public CheckScanner checkScanner = new CheckScanner(this);
 
-    public BoardController() {
+    public BoardController(GUIController guiController) {
+        this.guiController = guiController;
         board = new Board();
 
         this.setPreferredSize(new Dimension(board.cols * board.blockSize, board.rows * board.blockSize));
@@ -81,18 +84,18 @@ public class BoardController extends JPanel {
 
         capture(move.capture);
 
-        isWhiteToMove = !isWhiteToMove;
+        board.isWhiteToMove = !board.isWhiteToMove;
 
         updateGameState();
     }
 
     private void updateGameState() {
-        Piece king = findKing(isWhiteToMove);
+        Piece king = findKing(board.isWhiteToMove);
 
         if (checkScanner.isGameOver(king)) {
 
             if (checkScanner.isKingChecked(new Move(this, king, king.col, king.row))) {
-                System.out.println(isWhiteToMove ? "Black Wins!" : "White Wins!");
+                System.out.println(board.isWhiteToMove ? "Black Wins!" : "White Wins!");
             }
             else {
                 System.out.println("Stalemate");
@@ -154,9 +157,29 @@ public class BoardController extends JPanel {
         }
     }
 
-    public void promotePawn(Move move){
-        board.pieces.add(new Queen(this, move.toCol, move.toRow, move.piece.isWhite));
-        capture(move.piece);
+    public void promotePawn(Move move) {
+        String chosenPiece = guiController.showPromotionDialog(move.piece.isWhite);
+
+        Piece promotedPiece = null;
+        switch (chosenPiece) {
+            case "Knight":
+                promotedPiece = new Knight(this, move.toCol, move.toRow, move.piece.isWhite);
+                break;
+            case "Bishop":
+                promotedPiece = new Bishop(this, move.toCol, move.toRow, move.piece.isWhite);
+                break;
+            case "Rook":
+                promotedPiece = new Rook(this, move.toCol, move.toRow, move.piece.isWhite);
+                break;
+            case "Queen":
+            default:
+                promotedPiece = new Queen(this, move.toCol, move.toRow, move.piece.isWhite);
+                break;
+        }
+
+        // Replace the pawn with the selected piece
+        board.pieces.add(promotedPiece);
+        capture(move.piece);  // Remove the pawn from the board
     }
 
     public int getEnPassant(){
@@ -178,7 +201,7 @@ public class BoardController extends JPanel {
 
     public boolean isValidMove(Move move){
 
-        if(move.piece.isWhite != isWhiteToMove){
+        if(move.piece.isWhite != board.isWhiteToMove){
             return false;
         }
 
