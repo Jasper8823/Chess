@@ -24,21 +24,34 @@ public class GUIController {
         }
     }
 
+    BoardController boardController;
+
     protected int sheetScale;
 
     JFrame promoterChoice = new JFrame();
+    JFrame frame;
 
     public GUIController() {
         loadSpriteSheet();
 
-        JFrame frame = new JFrame();
+        frame = new JFrame();
         frame.setMinimumSize(new Dimension(1000, 1000));
 
         frame.setLayout(new GridBagLayout());
         frame.pack();
 
-        BoardController boardController = new BoardController(this);
-        frame.add(boardController);
+        gameStart();
+
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+
+    public void gameEnd(){
+        frame.dispose();
+    }
+
+    public void gameStart(){
+        boardController = new BoardController(this);
         ArrayList<Piece> pieces = new ArrayList<>();
         pieces.add(new Knight(boardController, 1,7,true));
         pieces.add(new Knight(boardController, 6,7,true));
@@ -86,8 +99,8 @@ public class GUIController {
             boardController.addPiece(piece);
         }
 
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+
+        frame.add(boardController);
     }
 
     public String showPromotionDialog(boolean isWhite) {

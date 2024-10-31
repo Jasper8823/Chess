@@ -12,6 +12,8 @@ import main.UserInteraction.Mouse;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -93,13 +95,45 @@ public class BoardController extends JPanel {
         Piece king = findKing(board.isWhiteToMove);
 
         if (checkScanner.isGameOver(king)) {
-
+            JFrame frame = new JFrame("Game Window");
+            frame.setSize(300, 150);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setLayout(new GridLayout(3, 1));
+            JLabel messageLabel;
             if (checkScanner.isKingChecked(new Move(this, king, king.col, king.row))) {
-                System.out.println(board.isWhiteToMove ? "Black Wins!" : "White Wins!");
+                messageLabel = new JLabel(board.isWhiteToMove ? "Black Wins!" : "White Wins!");
             }
             else {
-                System.out.println("Stalemate");
+                messageLabel = new JLabel("Stalemate");
             }
+            messageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+
+            frame.add(messageLabel);
+            // Create the "Play Again" button
+            JButton playAgainButton = new JButton("Play Again");
+            playAgainButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    guiController.gameEnd();
+                    frame.setVisible(false);
+                    new GUIController();
+                }
+            });
+
+            // Create the "Exit" button
+            JButton exitButton = new JButton("Exit");
+            exitButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    System.exit(0);
+                }
+            });
+            frame.setLocationRelativeTo(null);
+
+            frame.add(playAgainButton);
+            frame.add(exitButton);
+
+            frame.setVisible(true);
         }else if(notEnoughPieces(true) && notEnoughPieces(false)){
             System.out.println("Not enough pieces to mate");
         }
